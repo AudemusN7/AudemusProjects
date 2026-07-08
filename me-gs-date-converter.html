@@ -1,0 +1,1520 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mass Effect Galactic Standard Date Converter</title>
+  <style>
+    @font-face {
+      font-family: "BioMass";
+      src: url("./assets/fonts/1_BIOMASS_JPN.TTF") format("truetype");
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Tigensu";
+      src: url("./assets/fonts/3_TIGENSU_JPN.TTF") format("truetype");
+      font-display: swap;
+    }
+
+    :root {
+      color-scheme: dark;
+      --bg: #03070d;
+      --panel: rgba(15, 27, 53, 0.92);
+      --panel-2: rgba(13, 46, 74, 0.86);
+      --line: #2e69a9;
+      --line-bright: #73d8ff;
+      --text: #d6ecf8;
+      --muted: #9fb3cc;
+      --soft: #5ca8cf;
+      --blue: #1595d3;
+      --cyan: #9ffcff;
+      --amber: #f5b84b;
+      --highlight: #FD8E3D;
+      --red: #ff6b6b;
+      --green: #47f17e;
+      --shadow: 0 26px 80px rgba(0, 0, 0, 0.56);
+      --radius: 0;
+      font-family: "Tigensu", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.96) 0%, rgba(5, 10, 22, 0.96) 48%, rgba(10, 83, 143, 0.96) 100%),
+        radial-gradient(circle at 82% 36%, rgba(82, 190, 244, 0.14), transparent 20%),
+        radial-gradient(circle at 35% 62%, rgba(58, 118, 206, 0.13), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(25, 83, 123, 0.88), rgba(6, 42, 80, 0.9));
+      color: var(--text);
+      min-height: 38px;
+      border-radius: 0;
+      padding: 0 12px;
+      cursor: pointer;
+      transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+      clip-path: polygon(9px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 9px 100%, 0 calc(100% - 9px), 0 9px);
+      text-shadow: 0 0 10px rgba(143, 242, 255, 0.45);
+    }
+
+    button:hover {
+      border-color: #596274;
+      background: #2b313d;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      background: rgba(2, 15, 32, 0.86);
+      color: var(--text);
+      padding: 8px 10px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.13);
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .app {
+      width: min(1480px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 38px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+
+    .title {
+      display: grid;
+      gap: 8px;
+      padding-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 3.05vw, 3.35rem);
+      line-height: 1.18;
+      letter-spacing: 0;
+      max-width: none;
+      color: var(--cyan);
+      font-family: "BioMass", "Tigensu", sans-serif;
+      font-weight: 400;
+      text-shadow: 0 0 18px rgba(112, 232, 255, 0.24);
+      white-space: nowrap;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 830px;
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+
+    .metric-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(170px, 1fr));
+      gap: 8px;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(18, 42, 82, 0.82), rgba(9, 23, 48, 0.9));
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: var(--shadow);
+      clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px);
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 5px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 1rem;
+      line-height: 1.25;
+    }
+
+    .notice {
+      border: 1px solid rgba(245, 184, 75, 0.38);
+      background: rgba(4, 25, 47, 0.74);
+      color: #bfefff;
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      line-height: 1.45;
+      box-shadow: inset 0 0 0 1px rgba(122, 219, 255, 0.08);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 370px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .panel,
+    .center-panel,
+    .settings {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(21, 36, 72, 0.94), rgba(11, 17, 39, 0.96));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      clip-path: polygon(18px 0, calc(100% - 18px) 0, 100% 18px, 100% calc(100% - 18px), calc(100% - 18px) 100%, 18px 100%, 0 calc(100% - 18px), 0 18px);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      border-bottom: 1px solid var(--line);
+      padding: 15px;
+      background: rgba(16, 55, 91, 0.3);
+    }
+
+    .panel-title {
+      display: grid;
+      gap: 4px;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 1.05rem;
+      color: var(--cyan);
+      font-family: "BioMass", "Tigensu", sans-serif;
+      font-weight: 400;
+    }
+
+    h3 {
+      font-size: 0.92rem;
+      color: var(--cyan);
+      font-family: "BioMass", "Tigensu", sans-serif;
+      font-weight: 400;
+    }
+
+    .panel-title p,
+    .settings p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .panel-body {
+      padding: 15px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+      align-items: end;
+    }
+
+    .span-12 { grid-column: span 12; }
+    .span-6 { grid-column: span 6; }
+    .span-4 { grid-column: span 4; }
+    .span-3 { grid-column: span 3; }
+    .span-2 { grid-column: span 2; }
+
+    .primary {
+      border-color: rgba(139, 234, 255, 0.76);
+      background: linear-gradient(180deg, rgba(91, 183, 206, 0.86), rgba(17, 83, 133, 0.94));
+    }
+
+    .primary:hover {
+      border-color: rgba(159, 252, 255, 0.95);
+      background: linear-gradient(180deg, rgba(116, 223, 245, 0.9), rgba(22, 105, 161, 0.96));
+    }
+
+    .ghost {
+      background: transparent;
+    }
+
+    .danger-text {
+      color: var(--red);
+      min-height: 1.25rem;
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .nav-bank {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .nav-bank button {
+      padding: 0 6px;
+      min-width: 0;
+      white-space: nowrap;
+    }
+
+    .calendar-shell {
+      display: grid;
+      gap: 10px;
+    }
+
+    .calendar-top {
+      display: grid;
+      grid-template-columns: 40px minmax(0, 1fr) 40px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .calendar-title {
+      text-align: center;
+      font-weight: 760;
+      line-height: 1.25;
+    }
+
+    .calendar-subtitle {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.78rem;
+      margin-top: 2px;
+    }
+
+    .weekday-row,
+    .date-grid {
+      display: grid;
+      grid-template-columns: repeat(var(--calendar-columns, 7), minmax(0, 1fr));
+      gap: 5px;
+    }
+
+    .weekday-row div {
+      color: var(--soft);
+      text-align: center;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      min-height: 20px;
+    }
+
+    .date-cell {
+      position: relative;
+      aspect-ratio: 1 / 0.82;
+      min-height: 44px;
+      padding: 6px;
+      text-align: left;
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(21, 61, 96, 0.78), rgba(9, 24, 51, 0.88));
+      overflow: hidden;
+    }
+
+    .date-cell.empty {
+      opacity: 0.32;
+      cursor: default;
+    }
+
+    .date-cell.selected {
+      border-color: var(--highlight);
+      background: linear-gradient(180deg, rgba(253, 142, 61, 0.84), rgba(126, 57, 24, 0.92));
+      color: #fff7ef;
+      box-shadow: inset 0 0 0 1px rgba(255, 221, 188, 0.32), 0 0 18px rgba(253, 142, 61, 0.32);
+    }
+
+    .date-cell.today {
+      border-color: var(--amber);
+    }
+
+    .cell-day {
+      display: block;
+      font-weight: 760;
+      font-size: 1rem;
+      line-height: 1.1;
+    }
+
+    .center-panel {
+      display: grid;
+      gap: 14px;
+      padding: 15px;
+      position: sticky;
+      top: 12px;
+    }
+
+    .swap-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .result {
+      border: 1px solid var(--line);
+      background: rgba(2, 14, 31, 0.78);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .result-row {
+      display: grid;
+      gap: 3px;
+    }
+
+    .result-row span {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .result-row strong {
+      font-size: 1.05rem;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .result-row code {
+      color: var(--cyan);
+      background: transparent;
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 0.95rem;
+    }
+
+    .settings {
+      padding: 15px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .settings .form-grid {
+      gap: 8px;
+    }
+
+    .compact {
+      min-height: 34px;
+      padding: 6px 8px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 9px;
+      color: var(--muted);
+      background: rgba(5, 26, 51, 0.78);
+      font-size: 0.78rem;
+    }
+
+    .toast {
+      min-height: 1.4rem;
+      color: var(--green);
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 1220px) {
+      .topbar,
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .center-panel {
+        position: static;
+        order: -1;
+      }
+
+      .metric-strip {
+        min-width: 0;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        width: min(100% - 20px, 1480px);
+        padding-top: 14px;
+      }
+
+      .metric-strip {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: clamp(1.45rem, 8vw, 2rem);
+      }
+
+      .form-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+
+      .span-12,
+      .span-6,
+      .span-4,
+      .span-3,
+      .span-2 {
+        grid-column: span 6;
+      }
+
+      .nav-bank {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .date-cell {
+        min-height: 39px;
+        padding: 5px;
+      }
+
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="topbar">
+      <div class="title">
+        <h1>Mass Effect Date Converter</h1>
+        <div class="subtitle">
+          Convert between Earth UTC dates and Galactic Standard Time using a 344-day GS year with 34-year anti-leap cycles.
+        </div>
+      </div>
+      <div class="metric-strip" aria-label="Conversion constants">
+        <div class="metric"><span>GS year</span><strong>344 days, or 343 every 34th year</strong></div>
+        <div class="metric"><span>GS day</span><strong>20:100:100 GST = 27:46:40 UTC</strong></div>
+        <div class="metric"><span>Default anchor</span><strong>1 Jan 500 BCE 00:00 UTC = GS 0 M01 D01 00:00:00</strong></div>
+      </div>
+    </section>
+
+    <div class="notice">
+      A GS year has 10 months in the pattern 34, 35, 34, 34, 35, 34, 35, 34, 34, 35. Every 34th GS year is an anti-leap year, so the final month has 34 days. A GS day is 20 hours, each hour has 100 minutes, each minute has 100 seconds, and each GST second is half a UTC second. Across the anti-leap cycle, the average GS year is 398.114 UTC days.
+    </div>
+
+    <section class="workspace">
+      <section class="panel" aria-label="Earth calendar converter">
+        <div class="panel-header">
+          <div class="panel-title">
+            <h2>Earth Date</h2>
+            <p>Type a date or browse the proleptic Gregorian calendar.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <label class="span-12">Manual entry
+              <input id="earthManual" placeholder="June 3rd 2183 CE 14:30:00 UTC, 2183-06-03 14:30:00">
+            </label>
+            <label class="span-4">Year
+              <input id="earthYear" inputmode="numeric">
+            </label>
+            <label class="span-3">Era
+              <select id="earthEra">
+                <option value="CE">CE</option>
+                <option value="BCE">BCE</option>
+              </select>
+            </label>
+            <label class="span-3">Month
+              <select id="earthMonth"></select>
+            </label>
+            <label class="span-2">Day
+              <input id="earthDay" inputmode="numeric">
+            </label>
+            <label class="span-4">UTC hour
+              <input id="earthHour" inputmode="numeric">
+            </label>
+            <label class="span-4">UTC minute
+              <input id="earthMinute" inputmode="numeric">
+            </label>
+            <label class="span-4">UTC second
+              <input id="earthSecond" inputmode="decimal">
+            </label>
+          </div>
+          <div id="earthError" class="danger-text" role="status"></div>
+          <div class="nav-bank" aria-label="Earth year navigation">
+            <button type="button" data-earth-jump="-1000">-1000y</button>
+            <button type="button" data-earth-jump="-100">-100y</button>
+            <button type="button" data-earth-jump="-10">-10y</button>
+            <button type="button" data-earth-jump="10">+10y</button>
+            <button type="button" data-earth-jump="100">+100y</button>
+            <button type="button" data-earth-jump="1000">+1000y</button>
+          </div>
+          <div class="calendar-shell">
+            <div class="calendar-top">
+              <button type="button" id="earthPrevMonth" aria-label="Previous Earth month">&lt;</button>
+              <div class="calendar-title">
+                <div id="earthCalendarTitle"></div>
+                <div id="earthCalendarSubtitle" class="calendar-subtitle"></div>
+              </div>
+              <button type="button" id="earthNextMonth" aria-label="Next Earth month">&gt;</button>
+            </div>
+            <div class="weekday-row" aria-hidden="true">
+              <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+            </div>
+            <div id="earthGrid" class="date-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="center-panel" aria-label="Conversion results">
+        <div class="result">
+          <div class="result-row">
+            <span>Earth date</span>
+            <strong id="resultEarth">-</strong>
+          </div>
+          <div class="result-row">
+            <span>Galactic Standard</span>
+            <strong id="resultGs">-</strong>
+          </div>
+          <div class="result-row">
+            <span>Copyable forms</span>
+            <code id="resultCopy">-</code>
+          </div>
+          <div class="result-row">
+            <span>Offset from anchor</span>
+            <strong id="resultOffset">-</strong>
+          </div>
+        </div>
+
+        <div class="settings">
+          <div>
+            <h3>Anchor Settings</h3>
+            <p>Default assumes GS year 0, day 1 begins on 1 January 500 BCE at 00:00 UTC / 00:00:00 GST.</p>
+          </div>
+          <div class="form-grid">
+            <label class="span-4">Year
+              <input id="anchorYear" class="compact" inputmode="numeric" value="500">
+            </label>
+            <label class="span-3">Era
+              <select id="anchorEra" class="compact">
+                <option value="BCE" selected>BCE</option>
+                <option value="CE">CE</option>
+              </select>
+            </label>
+            <label class="span-3">Month
+              <select id="anchorMonth" class="compact"></select>
+            </label>
+            <label class="span-2">Day
+              <input id="anchorDay" class="compact" inputmode="numeric" value="1">
+            </label>
+            <label class="span-6">GS epoch year
+              <input id="anchorGsYear" class="compact" inputmode="numeric" value="0">
+            </label>
+            <div class="span-6">
+              <button id="applyAnchor" type="button" class="primary" style="width:100%">Apply Anchor</button>
+            </div>
+          </div>
+          <div id="anchorToast" class="toast"></div>
+          <div class="pill-row">
+            <span class="pill">BCE has no year zero</span>
+            <span class="pill">Earth calendar: Gregorian</span>
+            <span class="pill">GS calendar: 344-day base</span>
+          </div>
+        </div>
+      </aside>
+
+      <section class="panel" aria-label="Galactic Standard calendar converter">
+        <div class="panel-header">
+          <div class="panel-title">
+            <h2>Galactic Standard</h2>
+            <p>Use GS year plus month/day, or jump by day-of-year.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <label class="span-12">Manual entry
+              <input id="gsManual" placeholder="GS 2601 M07 18 10:50:00, GS 2601 day 223 10:50:00">
+            </label>
+            <label class="span-4">GS year
+              <input id="gsYear" inputmode="numeric">
+            </label>
+            <label class="span-3">GS month
+              <select id="gsMonth"></select>
+            </label>
+            <label class="span-2">Day
+              <input id="gsDay" inputmode="numeric">
+            </label>
+            <label class="span-3">Day-of-year
+              <input id="gsDoy" inputmode="numeric">
+            </label>
+            <label class="span-4">GST hour
+              <input id="gsHour" inputmode="numeric">
+            </label>
+            <label class="span-4">GST minute
+              <input id="gsMinute" inputmode="numeric">
+            </label>
+            <label class="span-4">GST second
+              <input id="gsSecond" inputmode="numeric">
+            </label>
+          </div>
+          <div id="gsError" class="danger-text" role="status"></div>
+          <div class="nav-bank" aria-label="GS year navigation">
+            <button type="button" data-gs-jump="-1000">-1000y</button>
+            <button type="button" data-gs-jump="-100">-100y</button>
+            <button type="button" data-gs-jump="-10">-10y</button>
+            <button type="button" data-gs-jump="10">+10y</button>
+            <button type="button" data-gs-jump="100">+100y</button>
+            <button type="button" data-gs-jump="1000">+1000y</button>
+          </div>
+          <div class="calendar-shell">
+            <div class="calendar-top">
+              <button type="button" id="gsPrevMonth" aria-label="Previous GS month">&lt;</button>
+              <div class="calendar-title">
+                <div id="gsCalendarTitle"></div>
+                <div id="gsCalendarSubtitle" class="calendar-subtitle"></div>
+              </div>
+              <button type="button" id="gsNextMonth" aria-label="Next GS month">&gt;</button>
+            </div>
+            <div id="gsWeekdays" class="weekday-row" aria-hidden="true"></div>
+            <div id="gsGrid" class="date-grid"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    const UTC_SECONDS_PER_DAY = 86400;
+    const GST_SECONDS_PER_UTC_SECOND = 2;
+    const GS_SECONDS_PER_MINUTE = 100;
+    const GS_MINUTES_PER_HOUR = 100;
+    const GS_HOURS_PER_DAY = 20;
+    const GS_SECONDS_PER_HOUR = GS_SECONDS_PER_MINUTE * GS_MINUTES_PER_HOUR;
+    const GS_SECONDS_PER_DAY = GS_SECONDS_PER_HOUR * GS_HOURS_PER_DAY;
+    const GS_STANDARD_YEAR_DAYS = 344;
+    const GS_ANTI_LEAP_YEAR_DAYS = 343;
+    const GS_ANTI_LEAP_INTERVAL = 34;
+    const GS_STANDARD_MONTH_LENGTHS = [34, 35, 34, 34, 35, 34, 35, 34, 34, 35];
+    const MONTH_NAMES = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const MONTH_SHORT = MONTH_NAMES.map((name) => name.slice(0, 3));
+    const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+    const els = {
+      earthManual: document.getElementById("earthManual"),
+      earthYear: document.getElementById("earthYear"),
+      earthEra: document.getElementById("earthEra"),
+      earthMonth: document.getElementById("earthMonth"),
+      earthDay: document.getElementById("earthDay"),
+      earthHour: document.getElementById("earthHour"),
+      earthMinute: document.getElementById("earthMinute"),
+      earthSecond: document.getElementById("earthSecond"),
+      earthError: document.getElementById("earthError"),
+      earthGrid: document.getElementById("earthGrid"),
+      earthCalendarTitle: document.getElementById("earthCalendarTitle"),
+      earthCalendarSubtitle: document.getElementById("earthCalendarSubtitle"),
+      earthPrevMonth: document.getElementById("earthPrevMonth"),
+      earthNextMonth: document.getElementById("earthNextMonth"),
+
+      gsManual: document.getElementById("gsManual"),
+      gsYear: document.getElementById("gsYear"),
+      gsMonth: document.getElementById("gsMonth"),
+      gsDay: document.getElementById("gsDay"),
+      gsDoy: document.getElementById("gsDoy"),
+      gsHour: document.getElementById("gsHour"),
+      gsMinute: document.getElementById("gsMinute"),
+      gsSecond: document.getElementById("gsSecond"),
+      gsError: document.getElementById("gsError"),
+      gsGrid: document.getElementById("gsGrid"),
+      gsWeekdays: document.getElementById("gsWeekdays"),
+      gsCalendarTitle: document.getElementById("gsCalendarTitle"),
+      gsCalendarSubtitle: document.getElementById("gsCalendarSubtitle"),
+      gsPrevMonth: document.getElementById("gsPrevMonth"),
+      gsNextMonth: document.getElementById("gsNextMonth"),
+      resultEarth: document.getElementById("resultEarth"),
+      resultGs: document.getElementById("resultGs"),
+      resultCopy: document.getElementById("resultCopy"),
+      resultOffset: document.getElementById("resultOffset"),
+
+      anchorYear: document.getElementById("anchorYear"),
+      anchorEra: document.getElementById("anchorEra"),
+      anchorMonth: document.getElementById("anchorMonth"),
+      anchorDay: document.getElementById("anchorDay"),
+      anchorGsYear: document.getElementById("anchorGsYear"),
+      applyAnchor: document.getElementById("applyAnchor"),
+      anchorToast: document.getElementById("anchorToast")
+    };
+
+    let state = {
+      mode: "earth",
+      earth: { year: 2183, month: 6, day: 3, hour: 0, minute: 0, second: 0 },
+      gs: { year: 0, month: 1, day: 1, doy: 1, hour: 0, minute: 0, second: 0 },
+      anchor: {
+        earthUtcSecond: utcSecondsFromCivil(-499, 1, 1, 0, 0, 0),
+        gsYear: 0
+      }
+    };
+
+    function floorDiv(a, b) {
+      return Math.floor(a / b);
+    }
+
+    function daysFromCivil(year, month, day) {
+      let y = year;
+      let m = month;
+      y -= m <= 2 ? 1 : 0;
+      const era = floorDiv(y, 400);
+      const yoe = y - era * 400;
+      const mp = m + (m > 2 ? -3 : 9);
+      const doy = Math.floor((153 * mp + 2) / 5) + day - 1;
+      const doe = yoe * 365 + Math.floor(yoe / 4) - Math.floor(yoe / 100) + doy;
+      return era * 146097 + doe - 719468;
+    }
+
+    function civilFromDays(z) {
+      z += 719468;
+      const era = floorDiv(z, 146097);
+      const doe = z - era * 146097;
+      const yoe = Math.floor((doe - Math.floor(doe / 1460) + Math.floor(doe / 36524) - Math.floor(doe / 146096)) / 365);
+      let y = yoe + era * 400;
+      const doy = doe - (365 * yoe + Math.floor(yoe / 4) - Math.floor(yoe / 100));
+      const mp = Math.floor((5 * doy + 2) / 153);
+      const d = doy - Math.floor((153 * mp + 2) / 5) + 1;
+      const m = mp + (mp < 10 ? 3 : -9);
+      y += m <= 2 ? 1 : 0;
+      return { year: y, month: m, day: d };
+    }
+
+    function utcSecondsFromCivil(year, month, day, hour = 0, minute = 0, second = 0) {
+      return daysFromCivil(year, month, day) * UTC_SECONDS_PER_DAY + hour * 3600 + minute * 60 + second;
+    }
+
+    function civilFromUtcSeconds(totalSeconds) {
+      const dayNumber = floorDiv(totalSeconds, UTC_SECONDS_PER_DAY);
+      let secondsOfDay = totalSeconds - dayNumber * UTC_SECONDS_PER_DAY;
+      if (secondsOfDay < 0) secondsOfDay += UTC_SECONDS_PER_DAY;
+      const date = civilFromDays(dayNumber);
+      const hour = Math.floor(secondsOfDay / 3600);
+      secondsOfDay -= hour * 3600;
+      const minute = Math.floor(secondsOfDay / 60);
+      const second = secondsOfDay - minute * 60;
+      return { ...date, hour, minute, second };
+    }
+
+    function isLeapYear(year) {
+      return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+    }
+
+    function daysInEarthMonth(year, month) {
+      if (month === 2) return isLeapYear(year) ? 29 : 28;
+      return [4, 6, 9, 11].includes(month) ? 30 : 31;
+    }
+
+    function earthWeekday(year, month, day) {
+      const days = daysFromCivil(year, month, day);
+      return ((days + 3) % 7 + 7) % 7;
+    }
+
+    function toAstronomicalYear(displayYear, era) {
+      const year = Number(displayYear);
+      if (!Number.isInteger(year) || year < 1) throw new Error("Earth year must be a whole number greater than 0.");
+      return era === "BCE" ? 1 - year : year;
+    }
+
+    function fromAstronomicalYear(year) {
+      return year <= 0
+        ? { displayYear: 1 - year, era: "BCE" }
+        : { displayYear: year, era: "CE" };
+    }
+
+    function formatEarthDate(date) {
+      const display = fromAstronomicalYear(date.year);
+      return `${MONTH_NAMES[date.month - 1]} ${ordinal(date.day)} ${display.displayYear} ${display.era} ${formatUtcTime(date)} UTC`;
+    }
+
+    function formatEarthCompact(date) {
+      const display = fromAstronomicalYear(date.year);
+      const m = String(date.month).padStart(2, "0");
+      const d = String(date.day).padStart(2, "0");
+      return `${display.displayYear.toString().padStart(4, "0")}-${m}-${d} ${formatUtcTime(date)} ${display.era}`;
+    }
+
+    function formatSecond(value) {
+      if (Number.isInteger(value)) return String(value).padStart(2, "0");
+      return value.toFixed(1).padStart(4, "0");
+    }
+
+    function formatUtcTime(date) {
+      return `${String(date.hour ?? 0).padStart(2, "0")}:${String(date.minute ?? 0).padStart(2, "0")}:${formatSecond(date.second ?? 0)}`;
+    }
+
+    function formatGsTime(gs) {
+      return `${String(gs.hour ?? 0).padStart(2, "0")}:${String(gs.minute ?? 0).padStart(2, "0")}:${String(gs.second ?? 0).padStart(2, "0")}`;
+    }
+
+    function formatDuration(seconds) {
+      const sign = seconds < 0 ? "-" : "";
+      const absolute = Math.abs(seconds);
+      const days = Math.floor(absolute / UTC_SECONDS_PER_DAY);
+      const remainder = absolute - days * UTC_SECONDS_PER_DAY;
+      const hours = Math.floor(remainder / 3600);
+      const minutes = Math.floor((remainder - hours * 3600) / 60);
+      const secs = remainder - hours * 3600 - minutes * 60;
+      return `${sign}${days.toLocaleString()} UTC days, ${hours}h ${minutes}m ${formatSecond(secs)}s`;
+    }
+
+    function ordinal(n) {
+      const mod100 = n % 100;
+      if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+      const mod10 = n % 10;
+      if (mod10 === 1) return `${n}st`;
+      if (mod10 === 2) return `${n}nd`;
+      if (mod10 === 3) return `${n}rd`;
+      return `${n}th`;
+    }
+
+    function monthLabel(index) {
+      return `M${String(index).padStart(2, "0")}`;
+    }
+
+    function isGsAntiLeapYear(year) {
+      return year !== 0 && year % GS_ANTI_LEAP_INTERVAL === 0;
+    }
+
+    function gsMonthLengths(year) {
+      const lengths = [...GS_STANDARD_MONTH_LENGTHS];
+      if (isGsAntiLeapYear(year)) lengths[9] = 34;
+      return lengths;
+    }
+
+    function gsYearLength(year) {
+      return isGsAntiLeapYear(year) ? GS_ANTI_LEAP_YEAR_DAYS : GS_STANDARD_YEAR_DAYS;
+    }
+
+    function gsMonthStartDoy(year, month) {
+      return gsMonthLengths(year).slice(0, month - 1).reduce((sum, length) => sum + length, 0) + 1;
+    }
+
+    function gsMonthDayToDoy(year, month, day) {
+      return gsMonthStartDoy(year, month) + day - 1;
+    }
+
+    function gsDoyToMonthDay(year, doy) {
+      let remaining = doy;
+      const lengths = gsMonthLengths(year);
+      for (let i = 0; i < lengths.length; i += 1) {
+        if (remaining <= lengths[i]) {
+          return { month: i + 1, day: remaining };
+        }
+        remaining -= lengths[i];
+      }
+      throw new Error(`GS day-of-year must be between 1 and ${gsYearLength(year)}.`);
+    }
+
+    function daysBeforeGsYear(year) {
+      if (year > 0) return year * GS_STANDARD_YEAR_DAYS - Math.floor((year - 1) / GS_ANTI_LEAP_INTERVAL);
+      if (year < 0) return year * GS_STANDARD_YEAR_DAYS + Math.floor((-year) / GS_ANTI_LEAP_INTERVAL);
+      return 0;
+    }
+
+    function gsYearFromAbsoluteDay(day) {
+      let a = Math.floor(day / GS_STANDARD_YEAR_DAYS) - 20;
+      let b = Math.floor(day / GS_STANDARD_YEAR_DAYS) + 20;
+      let lo = Math.min(a, b);
+      let hi = Math.max(a, b);
+
+      while (daysBeforeGsYear(lo) > day) lo -= Math.max(20, Math.abs(lo));
+      while (daysBeforeGsYear(hi + 1) <= day) hi += Math.max(20, Math.abs(hi) + 1);
+
+      while (lo < hi) {
+        const mid = Math.floor((lo + hi + 1) / 2);
+        if (daysBeforeGsYear(mid) <= day) lo = mid;
+        else hi = mid - 1;
+      }
+
+      return lo;
+    }
+
+    function gsDayDescriptor(year, month, day) {
+      return `Cycle week ${Math.floor((day - 1) / 10) + 1}, day ${((day - 1) % 10) + 1}`;
+    }
+
+    function earthToGs(earth) {
+      const utcSecond = utcSecondsFromCivil(earth.year, earth.month, earth.day, earth.hour ?? 0, earth.minute ?? 0, earth.second ?? 0);
+      const secondsSinceAnchor = utcSecond - state.anchor.earthUtcSecond;
+      const absoluteGsSecond = daysBeforeGsYear(state.anchor.gsYear) * GS_SECONDS_PER_DAY + secondsSinceAnchor * GST_SECONDS_PER_UTC_SECOND;
+      const absoluteGsDay = floorDiv(absoluteGsSecond, GS_SECONDS_PER_DAY);
+      const secondsOfGsDay = absoluteGsSecond - absoluteGsDay * GS_SECONDS_PER_DAY;
+      const year = gsYearFromAbsoluteDay(absoluteGsDay);
+      const doy = absoluteGsDay - daysBeforeGsYear(year) + 1;
+      const md = gsDoyToMonthDay(year, doy);
+      const hour = Math.floor(secondsOfGsDay / GS_SECONDS_PER_HOUR);
+      const afterHours = secondsOfGsDay - hour * GS_SECONDS_PER_HOUR;
+      const minute = Math.floor(afterHours / GS_SECONDS_PER_MINUTE);
+      const second = afterHours - minute * GS_SECONDS_PER_MINUTE;
+      return { year, month: md.month, day: md.day, doy, hour, minute, second, secondsSinceAnchor };
+    }
+
+    function gsToEarth(gs) {
+      const doy = gs.doy || gsMonthDayToDoy(gs.year, gs.month, gs.day);
+      const gsSecondsOfDay = (gs.hour ?? 0) * GS_SECONDS_PER_HOUR + (gs.minute ?? 0) * GS_SECONDS_PER_MINUTE + (gs.second ?? 0);
+      const absoluteGsSecond = (daysBeforeGsYear(gs.year) + doy - 1) * GS_SECONDS_PER_DAY + gsSecondsOfDay;
+      const anchorGsSecond = daysBeforeGsYear(state.anchor.gsYear) * GS_SECONDS_PER_DAY;
+      const gsSecondsSinceAnchor = absoluteGsSecond - anchorGsSecond;
+      const utcSecond = state.anchor.earthUtcSecond + gsSecondsSinceAnchor / GST_SECONDS_PER_UTC_SECOND;
+      const earth = civilFromUtcSeconds(utcSecond);
+      return { earth, secondsSinceAnchor: utcSecond - state.anchor.earthUtcSecond, gsSecondsSinceAnchor };
+    }
+
+    function validateEarthParts(year, month, day) {
+      if (!Number.isInteger(year)) throw new Error("Earth year is not valid.");
+      if (!Number.isInteger(month) || month < 1 || month > 12) throw new Error("Earth month must be 1-12.");
+      const maxDay = daysInEarthMonth(year, month);
+      if (!Number.isInteger(day) || day < 1 || day > maxDay) {
+        throw new Error(`Earth day must be 1-${maxDay} for ${MONTH_NAMES[month - 1]}.`);
+      }
+    }
+
+    function validateEarthTime(hour, minute, second) {
+      if (!Number.isInteger(hour) || hour < 0 || hour > 23) throw new Error("UTC hour must be 0-23.");
+      if (!Number.isInteger(minute) || minute < 0 || minute > 59) throw new Error("UTC minute must be 0-59.");
+      if (!Number.isFinite(second) || second < 0 || second >= 60) throw new Error("UTC second must be 0-59.999.");
+      if (!Number.isInteger(second * GST_SECONDS_PER_UTC_SECOND)) throw new Error("UTC second must use whole or half-second precision.");
+    }
+
+    function validateGsTime(hour, minute, second) {
+      if (!Number.isInteger(hour) || hour < 0 || hour >= GS_HOURS_PER_DAY) throw new Error("GST hour must be 0-19.");
+      if (!Number.isInteger(minute) || minute < 0 || minute >= GS_MINUTES_PER_HOUR) throw new Error("GST minute must be 0-99.");
+      if (!Number.isInteger(second) || second < 0 || second >= GS_SECONDS_PER_MINUTE) throw new Error("GST second must be 0-99.");
+    }
+
+    function validateGsParts(year, month, day, doy) {
+      if (!Number.isInteger(year)) throw new Error("GS year is not valid.");
+      if (doy !== undefined && doy !== null) {
+        const maxDoy = gsYearLength(year);
+        if (!Number.isInteger(doy) || doy < 1 || doy > maxDoy) {
+          throw new Error(`GS day-of-year must be 1-${maxDoy} for GS ${year}.`);
+        }
+      }
+      if (!Number.isInteger(month) || month < 1 || month > 10) throw new Error("GS month must be M01-M10.");
+      const maxDay = gsMonthLengths(year)[month - 1];
+      if (!Number.isInteger(day) || day < 1 || day > maxDay) {
+        throw new Error(`GS day must be 1-${maxDay} for ${monthLabel(month)}.`);
+      }
+    }
+
+    function parseInteger(value, name) {
+      const n = Number(String(value).trim());
+      if (!Number.isInteger(n)) throw new Error(`${name} must be a whole number.`);
+      return n;
+    }
+
+    function parseNumber(value, name) {
+      const n = Number(String(value).trim());
+      if (!Number.isFinite(n)) throw new Error(`${name} must be a valid number.`);
+      return n;
+    }
+
+    function extractTime(value) {
+      const time = { hour: 0, minute: 0, second: 0 };
+      let text = String(value).replace(/\b(utc|gst)\b/gi, "").trim();
+      const match = text.match(/(?:^|\s)(\d{1,2}):(\d{1,2})(?::(\d{1,2}(?:\.\d+)?))?(?:\s|$)/);
+      if (match) {
+        time.hour = Number(match[1]);
+        time.minute = Number(match[2]);
+        time.second = match[3] === undefined ? 0 : Number(match[3]);
+        text = `${text.slice(0, match.index)} ${text.slice(match.index + match[0].length)}`.replace(/\s+/g, " ").trim();
+      }
+      return { text, time };
+    }
+
+    function debounce(fn, delay = 260) {
+      let timer = null;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    }
+
+    function cleanManual(value) {
+      return String(value)
+        .trim()
+        .replace(/,/g, " ")
+        .replace(/\b(\d+)(st|nd|rd|th)\b/gi, "$1")
+        .replace(/\s+/g, " ");
+    }
+
+    function parseEarthManual(value) {
+      const extracted = extractTime(cleanManual(value));
+      const cleaned = extracted.text;
+      const time = extracted.time;
+      if (!cleaned) throw new Error("Enter an Earth date first.");
+      validateEarthTime(time.hour, time.minute, time.second);
+      let era = /\b(bce|bc)\b/i.test(cleaned) ? "BCE" : "CE";
+      const withoutEra = cleaned.replace(/\b(bce|bc|ce|ad)\b/gi, "").trim();
+      const monthLookup = new Map();
+      MONTH_NAMES.forEach((name, index) => {
+        monthLookup.set(name.toLowerCase(), index + 1);
+        monthLookup.set(name.slice(0, 3).toLowerCase(), index + 1);
+      });
+
+      let year;
+      let month;
+      let day;
+
+      const iso = withoutEra.match(/^([+-]?\d{1,6})[-/](\d{1,2})[-/](\d{1,2})$/);
+      if (iso) {
+        year = Number(iso[1]);
+        month = Number(iso[2]);
+        day = Number(iso[3]);
+        if (year <= 0) {
+          era = "BCE";
+          year = 1 - year;
+        }
+        const astro = toAstronomicalYear(year, era);
+        validateEarthParts(astro, month, day);
+        return { year: astro, month, day, ...time };
+      }
+
+      const parts = withoutEra.split(" ");
+      const monthIndex = parts.findIndex((part) => monthLookup.has(part.toLowerCase()));
+      if (monthIndex !== -1) {
+        month = monthLookup.get(parts[monthIndex].toLowerCase());
+        const numbers = parts.filter((_, index) => index !== monthIndex).map(Number).filter(Number.isFinite);
+        if (numbers.length < 2) throw new Error("Include day and year with the month name.");
+        if (monthIndex === 0) {
+          day = numbers[0];
+          year = numbers[1];
+        } else {
+          day = numbers[0];
+          year = numbers[1];
+        }
+        const astro = toAstronomicalYear(year, era);
+        validateEarthParts(astro, month, day);
+        return { year: astro, month, day, ...time };
+      }
+
+      const numeric = withoutEra.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{1,6})$/);
+      if (numeric) {
+        day = Number(numeric[1]);
+        month = Number(numeric[2]);
+        year = Number(numeric[3]);
+        const astro = toAstronomicalYear(year, era);
+        validateEarthParts(astro, month, day);
+        return { year: astro, month, day, ...time };
+      }
+
+      const yearOnly = withoutEra.match(/^(\d{1,6})$/);
+      if (yearOnly) {
+        year = Number(yearOnly[1]);
+        const astro = toAstronomicalYear(year, era);
+        return { year: astro, month: 1, day: 1, ...time };
+      }
+
+      throw new Error("Could not read that Earth date. Try 'June 3rd 2183 CE' or '2183-06-03'.");
+    }
+
+    function parseGsManual(value) {
+      const extracted = extractTime(cleanManual(value).replace(/\bgs\b/gi, ""));
+      const cleaned = extracted.text.trim();
+      const time = extracted.time;
+      if (!cleaned) throw new Error("Enter a GS date first.");
+      validateGsTime(time.hour, time.minute, time.second);
+      const dayMatch = cleaned.match(/^(-?\d{1,7})\s+day\s+(\d{1,3})$/i);
+      if (dayMatch) {
+        const year = Number(dayMatch[1]);
+        const doy = Number(dayMatch[2]);
+        const md = gsDoyToMonthDay(year, doy);
+        validateGsParts(year, md.month, md.day, doy);
+        return { year, month: md.month, day: md.day, doy, ...time };
+      }
+
+      const iso = cleaned.match(/^(-?\d{1,7})[-/\s]+(?:m)?(\d{1,2})[-/\s]+(\d{1,2})$/i);
+      if (iso) {
+        const year = Number(iso[1]);
+        const month = Number(iso[2]);
+        const day = Number(iso[3]);
+        const doy = gsMonthDayToDoy(year, month, day);
+        validateGsParts(year, month, day, doy);
+        return { year, month, day, doy, ...time };
+      }
+
+      throw new Error("Could not read that GS date. Try '2601 M07 18 10:50:00' or 'GS 2601 day 223 10:50:00'.");
+    }
+
+    function setActiveMode(mode) {
+      state.mode = mode;
+    }
+
+    function syncEarthInputs() {
+      const display = fromAstronomicalYear(state.earth.year);
+      els.earthYear.value = display.displayYear;
+      els.earthEra.value = display.era;
+      els.earthMonth.value = String(state.earth.month);
+      els.earthDay.value = state.earth.day;
+      els.earthHour.value = state.earth.hour ?? 0;
+      els.earthMinute.value = state.earth.minute ?? 0;
+      els.earthSecond.value = state.earth.second ?? 0;
+    }
+
+    function syncGsInputs() {
+      els.gsYear.value = state.gs.year;
+      els.gsMonth.value = String(state.gs.month);
+      els.gsDay.value = state.gs.day;
+      els.gsDoy.value = state.gs.doy;
+      els.gsHour.value = state.gs.hour ?? 0;
+      els.gsMinute.value = state.gs.minute ?? 0;
+      els.gsSecond.value = state.gs.second ?? 0;
+    }
+
+    function readEarthInputs() {
+      const year = toAstronomicalYear(parseInteger(els.earthYear.value, "Earth year"), els.earthEra.value);
+      const month = parseInteger(els.earthMonth.value, "Earth month");
+      const day = parseInteger(els.earthDay.value, "Earth day");
+      const hour = parseInteger(els.earthHour.value, "UTC hour");
+      const minute = parseInteger(els.earthMinute.value, "UTC minute");
+      const second = parseNumber(els.earthSecond.value, "UTC second");
+      validateEarthParts(year, month, day);
+      validateEarthTime(hour, minute, second);
+      return { year, month, day, hour, minute, second };
+    }
+
+    function readGsInputs(preferDoy = false) {
+      const year = parseInteger(els.gsYear.value, "GS year");
+      const hour = parseInteger(els.gsHour.value, "GST hour");
+      const minute = parseInteger(els.gsMinute.value, "GST minute");
+      const second = parseInteger(els.gsSecond.value, "GST second");
+      validateGsTime(hour, minute, second);
+      const doyText = String(els.gsDoy.value).trim();
+      let doy = Number(doyText);
+      if (preferDoy && doyText) {
+        if (!Number.isInteger(doy) || doy < 1 || doy > gsYearLength(year)) {
+          throw new Error(`GS day-of-year must be 1-${gsYearLength(year)} for GS ${year}.`);
+        }
+        const md = gsDoyToMonthDay(year, doy);
+        validateGsParts(year, md.month, md.day, doy);
+        return { year, month: md.month, day: md.day, doy, hour, minute, second };
+      }
+
+      const month = parseInteger(els.gsMonth.value, "GS month");
+      const day = parseInteger(els.gsDay.value, "GS day");
+      doy = gsMonthDayToDoy(year, month, day);
+      validateGsParts(year, month, day, doy);
+      return { year, month, day, doy, hour, minute, second };
+    }
+
+    function updateResultsFromEarth() {
+      setActiveMode("earth");
+      els.earthError.textContent = "";
+      try {
+        state.earth = readEarthInputs();
+        state.gs = earthToGs(state.earth);
+        syncGsInputs();
+        renderAll();
+      } catch (error) {
+        els.earthError.textContent = error.message;
+      }
+    }
+
+    function updateResultsFromGs(preferDoy = false) {
+      setActiveMode("gs");
+      els.gsError.textContent = "";
+      try {
+        state.gs = readGsInputs(preferDoy);
+        const converted = gsToEarth(state.gs);
+        state.earth = converted.earth;
+        syncEarthInputs();
+        renderAll();
+      } catch (error) {
+        els.gsError.textContent = error.message;
+      }
+    }
+
+    function applyEarthManual() {
+      els.earthError.textContent = "";
+      try {
+        state.earth = parseEarthManual(els.earthManual.value);
+        syncEarthInputs();
+        updateResultsFromEarth();
+      } catch (error) {
+        els.earthError.textContent = error.message;
+      }
+    }
+
+    function applyGsManual() {
+      els.gsError.textContent = "";
+      try {
+        state.gs = parseGsManual(els.gsManual.value);
+        syncGsInputs();
+        updateResultsFromGs();
+      } catch (error) {
+        els.gsError.textContent = error.message;
+      }
+    }
+
+    function renderEarthCalendar() {
+      const { year, month, day } = state.earth;
+      const display = fromAstronomicalYear(year);
+      els.earthCalendarTitle.textContent = `${MONTH_NAMES[month - 1]} ${display.displayYear} ${display.era}`;
+      els.earthCalendarSubtitle.textContent = `${WEEKDAYS[earthWeekday(year, month, 1)]} start, ${daysInEarthMonth(year, month)} days`;
+      els.earthGrid.innerHTML = "";
+      els.earthGrid.style.setProperty("--calendar-columns", 7);
+
+      const firstWeekday = earthWeekday(year, month, 1);
+      const maxDay = daysInEarthMonth(year, month);
+      for (let i = 0; i < firstWeekday; i += 1) {
+        const empty = document.createElement("button");
+        empty.type = "button";
+        empty.className = "date-cell empty";
+        empty.disabled = true;
+        els.earthGrid.appendChild(empty);
+      }
+
+      for (let d = 1; d <= maxDay; d += 1) {
+        const cell = document.createElement("button");
+        cell.type = "button";
+        cell.className = "date-cell";
+        if (d === day) cell.classList.add("selected");
+        cell.innerHTML = `<span class="cell-day">${d}</span>`;
+        cell.addEventListener("click", () => {
+          state.earth = { ...state.earth, year, month, day: d };
+          syncEarthInputs();
+          updateResultsFromEarth();
+        });
+        els.earthGrid.appendChild(cell);
+      }
+    }
+
+    function renderGsCalendar() {
+      const { year, month, day } = state.gs;
+      const startDoy = gsMonthStartDoy(year, month);
+      const monthLength = gsMonthLengths(year)[month - 1];
+      const columns = 10;
+      els.gsCalendarTitle.textContent = `GS ${year} - ${monthLabel(month)}`;
+      els.gsCalendarSubtitle.textContent = `Days ${startDoy}-${startDoy + monthLength - 1} of ${gsYearLength(year)}${isGsAntiLeapYear(year) ? " - anti-leap year" : ""}`;
+      els.gsWeekdays.style.setProperty("--calendar-columns", columns);
+      els.gsGrid.style.setProperty("--calendar-columns", columns);
+      els.gsWeekdays.innerHTML = "";
+      els.gsGrid.innerHTML = "";
+      for (let i = 1; i <= columns; i += 1) {
+        const marker = document.createElement("div");
+        marker.textContent = String(i).padStart(2, "0");
+        els.gsWeekdays.appendChild(marker);
+      }
+
+      for (let d = 1; d <= monthLength; d += 1) {
+        const doy = startDoy + d - 1;
+        const cell = document.createElement("button");
+        cell.type = "button";
+        cell.className = "date-cell";
+        if (d === day) cell.classList.add("selected");
+        cell.innerHTML = `<span class="cell-day">${d}</span>`;
+        cell.addEventListener("click", () => {
+          state.gs = { ...state.gs, year, month, day: d, doy };
+          syncGsInputs();
+          updateResultsFromGs();
+        });
+        els.gsGrid.appendChild(cell);
+      }
+    }
+
+    function renderResult() {
+      const earth = state.earth;
+      const gs = earthToGs(earth);
+      const display = fromAstronomicalYear(earth.year);
+      els.resultEarth.textContent = formatEarthDate(earth);
+      els.resultGs.textContent = `GS ${gs.year}, ${monthLabel(gs.month)} ${ordinal(gs.day)}, day ${gs.doy}, ${formatGsTime(gs)} GST - ${gsDayDescriptor(gs.year, gs.month, gs.day)}`;
+      els.resultCopy.textContent = `${formatEarthCompact(earth)} UTC -> GS ${gs.year} D${gs.doy} ${formatGsTime(gs)} / ${gs.year}-${String(gs.month).padStart(2, "0")}-${String(gs.day).padStart(2, "0")} ${formatGsTime(gs)}`;
+      els.resultOffset.textContent = `${formatDuration(gs.secondsSinceAnchor)} since anchor (${display.era === "BCE" ? "pre-CE handling active" : "CE date"})`;
+    }
+
+    function renderAll() {
+      syncEarthInputs();
+      syncGsInputs();
+      renderResult();
+      renderEarthCalendar();
+      renderGsCalendar();
+    }
+
+    function moveEarthMonth(delta) {
+      let { year, month, day } = state.earth;
+      month += delta;
+      while (month < 1) {
+        month += 12;
+        year -= 1;
+      }
+      while (month > 12) {
+        month -= 12;
+        year += 1;
+      }
+      day = Math.min(day, daysInEarthMonth(year, month));
+      state.earth = { ...state.earth, year, month, day };
+      syncEarthInputs();
+      updateResultsFromEarth();
+    }
+
+    function moveGsMonth(delta) {
+      let { year, month, day } = state.gs;
+      month += delta;
+      while (month < 1) {
+        month += 10;
+        year -= 1;
+      }
+      while (month > 10) {
+        month -= 10;
+        year += 1;
+      }
+      day = Math.min(day, gsMonthLengths(year)[month - 1]);
+      const doy = gsMonthDayToDoy(year, month, day);
+      state.gs = { ...state.gs, year, month, day, doy };
+      syncGsInputs();
+      updateResultsFromGs();
+    }
+
+    function jumpEarthYears(delta) {
+      let { year, month, day } = state.earth;
+      year += delta;
+      if (year === 0) year += delta > 0 ? 1 : -1;
+      day = Math.min(day, daysInEarthMonth(year, month));
+      state.earth = { ...state.earth, year, month, day };
+      syncEarthInputs();
+      updateResultsFromEarth();
+    }
+
+    function jumpGsYears(delta) {
+      const year = state.gs.year + delta;
+      const day = Math.min(state.gs.day, gsMonthLengths(year)[state.gs.month - 1]);
+      state.gs = { ...state.gs, year, day, doy: gsMonthDayToDoy(year, state.gs.month, day) };
+      syncGsInputs();
+      updateResultsFromGs();
+    }
+
+    function applyAnchorSettings() {
+      els.anchorToast.textContent = "";
+      try {
+        const year = toAstronomicalYear(parseInteger(els.anchorYear.value, "Anchor year"), els.anchorEra.value);
+        const month = parseInteger(els.anchorMonth.value, "Anchor month");
+        const day = parseInteger(els.anchorDay.value, "Anchor day");
+        const gsYear = parseInteger(els.anchorGsYear.value, "GS epoch year");
+        validateEarthParts(year, month, day);
+        state.anchor = { earthUtcSecond: utcSecondsFromCivil(year, month, day, 0, 0, 0), gsYear };
+        els.anchorToast.textContent = "Anchor applied.";
+        if (state.mode === "earth") updateResultsFromEarth();
+        else updateResultsFromGs();
+      } catch (error) {
+        els.anchorToast.textContent = error.message;
+      }
+    }
+
+    function populateSelects() {
+      MONTH_NAMES.forEach((name, index) => {
+        const value = String(index + 1);
+        const opt = new Option(name, value);
+        els.earthMonth.add(opt);
+        els.anchorMonth.add(new Option(name, value));
+      });
+      GS_STANDARD_MONTH_LENGTHS.forEach((length, index) => {
+        const label = index === 9 ? `${length} days, anti-leap 34` : `${length} days`;
+        els.gsMonth.add(new Option(`${monthLabel(index + 1)} - ${label}`, String(index + 1)));
+      });
+      els.anchorMonth.value = "1";
+    }
+
+    function bindEvents() {
+      const applyEarthManualSoon = debounce(() => {
+        if (els.earthManual.value.trim()) applyEarthManual();
+      });
+      const applyGsManualSoon = debounce(() => {
+        if (els.gsManual.value.trim()) applyGsManual();
+      });
+      const updateEarthSoon = debounce(updateResultsFromEarth);
+      const updateGsSoon = debounce(() => updateResultsFromGs(false));
+      const updateGsDoySoon = debounce(() => updateResultsFromGs(true));
+
+      els.earthManual.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") applyEarthManual();
+      });
+      els.gsManual.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") applyGsManual();
+      });
+      els.earthManual.addEventListener("input", applyEarthManualSoon);
+      els.gsManual.addEventListener("input", applyGsManualSoon);
+      els.earthManual.addEventListener("change", applyEarthManual);
+      els.gsManual.addEventListener("change", applyGsManual);
+      els.earthPrevMonth.addEventListener("click", () => moveEarthMonth(-1));
+      els.earthNextMonth.addEventListener("click", () => moveEarthMonth(1));
+      els.gsPrevMonth.addEventListener("click", () => moveGsMonth(-1));
+      els.gsNextMonth.addEventListener("click", () => moveGsMonth(1));
+      els.applyAnchor.addEventListener("click", applyAnchorSettings);
+
+      document.querySelectorAll("[data-earth-jump]").forEach((button) => {
+        button.addEventListener("click", () => jumpEarthYears(Number(button.dataset.earthJump)));
+      });
+      document.querySelectorAll("[data-gs-jump]").forEach((button) => {
+        button.addEventListener("click", () => jumpGsYears(Number(button.dataset.gsJump)));
+      });
+
+      [els.earthYear, els.earthEra, els.earthMonth, els.earthDay, els.earthHour, els.earthMinute, els.earthSecond].forEach((input) => {
+        input.addEventListener("change", updateResultsFromEarth);
+        input.addEventListener("input", updateEarthSoon);
+      });
+      [els.gsYear, els.gsMonth, els.gsDay, els.gsHour, els.gsMinute, els.gsSecond].forEach((input) => {
+        input.addEventListener("change", () => updateResultsFromGs(false));
+        input.addEventListener("input", updateGsSoon);
+      });
+      els.gsDoy.addEventListener("change", () => updateResultsFromGs(true));
+      els.gsDoy.addEventListener("input", updateGsDoySoon);
+    }
+
+    function init() {
+      populateSelects();
+      bindEvents();
+      state.gs = earthToGs(state.earth);
+      renderAll();
+    }
+
+    init();
+  </script>
+</body>
+</html>
